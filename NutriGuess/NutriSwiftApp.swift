@@ -1,20 +1,12 @@
-//
-//  NutriGuessApp.swift
-//  NutriGuess
-//
-//  Created by Etudiants on 25/02/2026.
-//
-
 import SwiftUI
 import SwiftData
 
-struct NutriGuessApp: App {
+@main
+struct NutriSwiftApp: App {
+    // On déclare le container pour SwiftData
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
+        let schema = Schema([SavedProduct.self])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
