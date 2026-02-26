@@ -1,86 +1,73 @@
 
 import SwiftUI
-
 struct FoodGuesserView: View {
     @Bindable var store: FoodStore
     @State private var currentProduct: ProductAPI?
     @State private var userGuess: Double = 250
     @State private var showResult = false
     @State private var message = ""
-    @State private var gameStarted = false // État pour savoir si on est dans le jeu
+    @State private var gameStarted = false
+    @State private var isPrepatingGame = false
 
     var body: some View {
         NavigationStack {
             VStack {
-                if !gameStarted {
-                    // ÉCRAN D'ACCUEIL DU JEU
+                if isPrepatingGame {
+                    VStack {
+                        ProgressView()
+                        Text("Chargement des produits...").padding()
+                    }
+                } else if !gameStarted {
                     VStack(spacing: 20) {
-                        Image(systemName: "fork.knife.circle.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(.orange)
+                        Image(systemName: "fork.knife.circle.fill").font(.system(size: 80)).foregroundColor(.orange)
+                        Text("Nutri Guess").font(.largeTitle).bold()
                         
-                        Text("Nutri Guess")
-                            .font(.largeTitle).bold()
-                        
-                        Text("Devinez les calories des produits !")
-                            .foregroundColor(.secondary)
-
                         Button(action: {
                             Task {
-                                if store.searchResults.isEmpty {
-                                    await store.loadInitialProducts()
-                                }
-                                if !store.searchResults.isEmpty {
-                                    nextRound()
-                                    gameStarted = true
-                                }
+                                isPrepatingGame = true
+                                await store.loadGameData()
+                                isPrepatingGame = false
+                                nextRound()
+                                gameStarted = true
                             }
                         }) {
-                            Text("Lancer le jeu")
-                                .font(.headline)
-                                .padding()
-                                .frame(maxWidth: .infinity)
+                            Text("Lancer le jeu").bold().padding().frame(maxWidth: .infinity)
                         }
+                        .buttonStyle(.borderedProminent).tint(.orange).padding(.horizontal, 40)
                     }
                 } else if let product = currentProduct {
-                    // ÉCRAN DE JEU ACTIF
                     VStack(spacing: 20) {
                         AsyncImage(url: URL(string: product.imageURL ?? "")) { img in
                             img.resizable().scaledToFit()
                         } placeholder: { ProgressView() }
-                        .frame(height: 200)
-                        .cornerRadius(15)
+                        .frame(height: 200).cornerRadius(15)
 
-                        Text(product.name)
-                            .font(.title3).bold().multilineTextAlignment(.center)
+                        Text(product.name).font(.title3).bold().multilineTextAlignment(.center)
 
                         VStack {
-                            Text("\(Int(userGuess)) kcal")
-                                .font(.system(size: 45, weight: .bold, design: .rounded))
-                                .foregroundColor(.orange)
-                            
-                            Slider(value: $userGuess, in: 0...800, step: 5)
-                                .tint(.orange)
-                        }
-                        .padding()
+                            Text("\(Int(userGuess)) kcal").font(.system(size: 45, weight: .bold, design: .rounded)).foregroundColor(.orange)
+                            Slider(value: $userGuess, in: 0...800, step: 5).tint(.orange)
+                        }.padding()
 
-                        Button("Valider") { checkResult() }
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.large)
+                        Button("Valider") {
+                            checkResult() // Calculer le message PUIS afficher
+                        }
+                        .buttonStyle(.borderedProminent).controlSize(.large)
                     }
                     .padding()
                     .toolbar {
                         ToolbarItem(placement: .topBarLeading) {
-                            Button("Arrêter") { gameStarted = false }
-                                .foregroundColor(.red)
+                            Button("Quitter") { gameStarted = false }.foregroundColor(.red)
                         }
                     }
                 }
             }
-            .navigationTitle(gameStarted ? "Quel est le score ?" : "")
-            .alert(message, isPresented: $showResult) {
+            // Utilisation d'une version plus stable de l'alerte
+            .alert("Résultat", isPresented: $showResult) {
                 Button("Continuer", action: nextRound)
-                Button("Quitter", action: { gameStarted = false })
+                Button("Arrêter", action: { gameStarted = false })
+            } message: {
+                Text(message)
             }
         }
     }
@@ -88,12 +75,22 @@ struct FoodGuesserView: View {
     func checkResult() {
         guard let actual = currentProduct?.calories else { return }
         let diff = abs(actual - userGuess)
-        message = diff < 30 ? "Bravo ! C'était \(Int(actual)) kcal" : "Raté ! C'était \(Int(actual)) kcal"
+        
+        // On prépare le message d'abord
+        if diff < 30 {
+            message = "Excellent ! C'était \(Int(actual)) kcal."
+        } else if diff < 100 {
+            message = "Pas mal ! C'était \(Int(actual)) kcal."
+        } else {
+            message = "Oups ! C'était \(Int(actual)) kcal."
+        }
+        
+        // On déclenche l'affichage
         showResult = true
     }
 
     func nextRound() {
-        currentProduct = store.searchResults.randomElement()
+        currentProduct = store.gameProducts.randomElement()
         userGuess = 250
     }
 }
