@@ -14,13 +14,13 @@ struct SearchView: View {
                 .onSubmit { Task { await store.search(query: text) } }
 
             if store.isLoading {
-                ProgressView("Recherche...")
-            } else if store.searchResults.isEmpty && store.hasSearched {
-                // Message si la recherche n'a rien donné
+                ProgressView("Recherche en cours...")
+            } else if store.hasSearched && store.searchResults.isEmpty {
+                // Ce bloc s'affiche uniquement si une recherche a été faite ET n'a rien trouvé
                 ContentUnavailableView(
                     "Produit pas trouvé",
-                    systemImage: "exclamationmark.magnifyingglass",
-                    description: Text("Vérifiez l'orthographe ou essayez un autre mot.")
+                    systemImage: "magnifyingglass",
+                    description: Text("Essayez un autre mot-clé.")
                 )
             } else {
                 List(store.searchResults) { product in

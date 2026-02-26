@@ -28,10 +28,12 @@ struct FoodGuesserView: View {
                         Button(action: {
                             Task {
                                 if store.searchResults.isEmpty {
-                                    await $store.loadInitialProducts
+                                    await store.loadInitialProducts()
                                 }
-                                nextRound()
-                                gameStarted = true
+                                if !store.searchResults.isEmpty {
+                                    nextRound()
+                                    gameStarted = true
+                                }
                             }
                         }) {
                             Text("Lancer le jeu")
@@ -39,9 +41,6 @@ struct FoodGuesserView: View {
                                 .padding()
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.orange)
-                        .padding(.horizontal, 40)
                     }
                 } else if let product = currentProduct {
                     // ÉCRAN DE JEU ACTIF
