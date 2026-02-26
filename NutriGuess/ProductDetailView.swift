@@ -86,9 +86,6 @@ struct ProductDetailView: View {
             animateButton = true
         }
         
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-        
         if let existingItem = basketItems.first(where: { $0.productName == product.name }) {
             existingItem.quantity += 1
         } else {
