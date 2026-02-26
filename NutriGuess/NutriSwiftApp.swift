@@ -17,6 +17,6 @@ struct NutriSwiftApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: BasketItem.self)
     }
 }

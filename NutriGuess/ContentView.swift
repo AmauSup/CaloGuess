@@ -22,7 +22,7 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
-}
+    #Preview {
+        ContentView()
+            .modelContainer(for: BasketItem.self, inMemory: true)
+    }

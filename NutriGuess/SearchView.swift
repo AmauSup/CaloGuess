@@ -1,11 +1,13 @@
 import SwiftUI
+import SwiftData
 
 struct SearchView: View {
     @Bindable var store: FoodStore
     @State private var text = ""
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
+            
             TextField("Rechercher...", text: $text)
                 .padding()
                 .background(Color(.systemGray6))
@@ -13,24 +15,31 @@ struct SearchView: View {
                 .padding()
                 .onSubmit { Task { await store.search(query: text) } }
 
-            if store.isLoading {
-                ProgressView("Recherche en cours...")
-            } else if store.hasSearched && store.searchResults.isEmpty {
-                // Ce bloc s'affiche uniquement si une recherche a été faite ET n'a rien trouvé
-                ContentUnavailableView(
-                    "Produit pas trouvé",
-                    systemImage: "magnifyingglass",
-                    description: Text("Essayez un autre mot-clé.")
-                )
-            } else {
-                List(store.searchResults) { product in
-                    NavigationLink(destination: ProductDetailView(product: product, store: store, onAddToBasket: {
-                        store.addToBasket(product)
-                    })) {
-                        ProductRow(item: product)
+            Group {
+                if store.isLoading {
+                    VStack {
+                        Spacer()
+                        ProgressView("Recherche en cours...")
+                        Spacer()
                     }
+                } else if store.hasSearched && store.searchResults.isEmpty {
+                    ContentUnavailableView(
+                        "Produit pas trouvé",
+                        systemImage: "magnifyingglass",
+                        description: Text("Essayez un autre mot-clé.")
+                    )
+                } else {
+                    List(store.searchResults) { product in
+                        NavigationLink(destination: ProductDetailView(product: product, store: store)) {
+                            ProductRow(item: product)
+                        }
+                    }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
+            }
+            
+            if !store.hasSearched && !store.isLoading {
+                Spacer()
             }
         }
     }
