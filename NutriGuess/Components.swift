@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct ProductRow: View {
-    // On utilise 'any FoodItem' pour accepter soit ProductAPI soit SavedProduct
     let item: any FoodItem
     
     var body: some View {
@@ -19,7 +18,6 @@ struct ProductRow: View {
                     .font(.headline)
                     .lineLimit(1)
                 
-                // Utilisation de l'optionnel (?? 0)
                 Text("\(Int(item.calories ?? 0)) kcal / 100g")
                     .font(.caption)
                     .foregroundColor(.secondary)

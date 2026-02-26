@@ -6,37 +6,66 @@ struct BasketView: View {
     var body: some View {
         VStack {
             if store.basket.isEmpty {
-                ContentUnavailableView("Panier vide", systemImage: "cart", description: Text("Ajoutez des produits depuis la recherche."))
+                ContentUnavailableView("Votre panier est vide", systemImage: "cart", description: Text("Ajoutez des produits depuis l'onglet Recherche."))
             } else {
                 List {
-                    ForEach($store.basket) { $item in
-                        HStack {
+                    ForEach(store.basket) { item in
+                        HStack(spacing: 12) {
                             ProductRow(item: item.product)
+                                .opacity(item.quantity == 0 ? 0.5 : 1.0)
                             
                             Spacer()
                             
-                            // Contrôle des quantités
-                            HStack {
-                                Button(action: { if item.quantity > 1 { item.quantity -= 1 } }) {
+                            HStack(spacing: 8) {
+                                Button(action: {
+                                    if let index = store.basket.firstIndex(where: { $0.id == item.id }) {
+                                        if store.basket[index].quantity > 0 {
+                                            store.basket[index].quantity -= 1
+                                        }
+                                    }
+                                }) {
                                     Image(systemName: "minus.circle")
+                                        .foregroundColor(item.quantity > 0 ? .blue : .gray)
                                 }
+
                                 Text("\(item.quantity)")
-                                    .frame(width: 30)
-                                Button(action: { item.quantity += 1 }) {
+                                    .font(.system(.body, design: .monospaced))
+                                    .frame(width: 25)
+                                    .foregroundColor(item.quantity == 0 ? .secondary : .primary)
+
+                                Button(action: {
+                                    if let index = store.basket.firstIndex(where: { $0.id == item.id }) {
+                                        store.basket[index].quantity += 1
+                                    }
+                                }) {
                                     Image(systemName: "plus.circle")
+                                        .foregroundColor(.blue)
+                                }
+                                
+                                Divider().frame(height: 20).padding(.horizontal, 2)
+                                
+                                Button(action: {
+                                    withAnimation {
+                                        store.basket.removeAll(where: { $0.id == item.id })
+                                    }
+                                }) {
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red)
                                 }
                             }
                             .buttonStyle(.borderless)
                         }
                     }
-                    .onDelete { indexSet in store.basket.remove(atOffsets: indexSet) }
-                    
+                    .onDelete { indexSet in
+                        store.basket.remove(atOffsets: indexSet)
+                    }
+
                     Section {
                         HStack {
-                            Text("Total Nutritionnel").bold()
+                            Text("Total :").bold()
                             Spacer()
                             Text("\(Int(store.totalCalories)) kcal")
-                                .bold()
+                                .font(.title3).bold()
                                 .foregroundColor(.orange)
                         }
                     }

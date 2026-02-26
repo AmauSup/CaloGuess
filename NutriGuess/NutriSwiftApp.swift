@@ -3,7 +3,6 @@ import SwiftData
 
 @main
 struct NutriSwiftApp: App {
-    // On déclare le container pour SwiftData
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([SavedProduct.self])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)

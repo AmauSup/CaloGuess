@@ -14,19 +14,17 @@ struct SearchView: View {
                 .onSubmit { Task { await store.search(query: text) } }
 
             if store.isLoading {
-                Spacer()
-                // Ici tu peux mettre un GIF avec une librairie,
-                // ou le ProgressView natif qui est très propre :
-                VStack(spacing: 20) {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                    Text("Recherche des produits...")
-                        .foregroundColor(.secondary)
-                }
-                Spacer()
+                ProgressView("Recherche...")
+            } else if store.searchResults.isEmpty && store.hasSearched {
+                // Message si la recherche n'a rien donné
+                ContentUnavailableView(
+                    "Produit pas trouvé",
+                    systemImage: "exclamationmark.magnifyingglass",
+                    description: Text("Vérifiez l'orthographe ou essayez un autre mot.")
+                )
             } else {
                 List(store.searchResults) { product in
-                    NavigationLink(destination: ProductDetailView(product: product, onAddToBasket: {
+                    NavigationLink(destination: ProductDetailView(product: product, store: store, onAddToBasket: {
                         store.addToBasket(product)
                     })) {
                         ProductRow(item: product)

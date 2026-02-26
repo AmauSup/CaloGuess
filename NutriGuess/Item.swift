@@ -1,9 +1,3 @@
-//
-//  Item.swift
-//  NutriGuess
-//
-//  Created by Etudiants on 25/02/2026.
-//
 
 import Foundation
 import SwiftData

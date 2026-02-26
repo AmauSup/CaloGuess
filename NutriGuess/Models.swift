@@ -14,16 +14,13 @@ struct ProductAPI: Codable, FoodItem, Identifiable {
     let quantity: String?
     let imageURL: String?
     
-    // Scores
     let nutriScore: String?
     let novaGroup: Int?
     let ecoScore: String?
     
-    // Détails avancés
     let ingredients: String?
     let allergens: String?
     
-    // Nutriments (Mapping spécifique OpenFoodFacts)
     let nutriments: Nutriments?
 
     var calories: Double? { nutriments?.calories }
